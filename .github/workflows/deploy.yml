@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
@@ -20,5 +20,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Deploy to S3
-        run: aws s3 sync . s3://your-bucket-name --delete
+      - name: Upload Files to S3
+        run: |
+          aws s3 sync . s3://github-bucket-for-statichosting --delete \
+          --exclude ".git/*" \
+          --exclude ".github/*" \
+          --exclude "README.md"
+
+      - name: Set Website Files Public
+        run: |
+          aws s3 cp s3://github-bucket-for-statichosting s3://github-bucket-for-statichosting \
+          --recursive \
+          --acl public-read
